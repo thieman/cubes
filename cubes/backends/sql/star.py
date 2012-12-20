@@ -176,6 +176,18 @@ class SnowflakeBrowser(AggregationBrowser):
         for level in levels:
             attributes.extend(level.attributes)
 
+        # add attributes from any other dimensions used in cell cuts
+        for cut in cell.cuts:
+
+            cut_dimension = self.cube.dimension(cut.dimension)
+            if cut_dimension == dimension:
+                continue
+            cut_hierarchy = cut_dimension.hierarchy(cut.hierarchy)
+
+            cut_levels = cut_hierarchy.levels[:cut.level_depth()]
+            for cut_level in cut_levels:
+                attributes.extend(cut_level.attributes)
+
         statement = self.context.denormalized_statement(attributes=attributes,
                                                         include_fact_key=False)
         cond = self.context.condition_for_cell(cell)
